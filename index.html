@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>NEON NET DEFENDER</title>
+<style>
+:root{--cyan:#00f7ff;--pink:#ff2bd6;--purple:#8a2eff;--green:#39ff88;--red:#ff365e;--dark:#050617}
+*{box-sizing:border-box} html,body{height:100%;margin:0;overflow:hidden;background:var(--dark);font-family:Arial,Helvetica,sans-serif;color:#fff;touch-action:manipulation}
+body:before{content:"";position:fixed;inset:0;background:radial-gradient(circle at 50% 15%,#34205e 0,#090b24 40%,#02030b 100%);z-index:-5}
+#city{position:fixed;inset:0;z-index:-4;overflow:hidden}
+.grid{position:absolute;left:-20%;right:-20%;bottom:-28%;height:72%;background:linear-gradient(rgba(0,247,255,.22) 1px,transparent 1px),linear-gradient(90deg,rgba(0,247,255,.22) 1px,transparent 1px);background-size:58px 42px;transform:perspective(340px) rotateX(61deg);animation:gridmove 2.2s linear infinite;box-shadow:0 -8px 35px #00f7ff55}
+@keyframes gridmove{to{background-position:0 42px}}
+.skyline{position:absolute;bottom:18%;width:100%;height:45%;filter:drop-shadow(0 0 13px #8a2eff)}
+.building{position:absolute;bottom:0;background:linear-gradient(90deg,#090b22,#171042);border:1px solid #8a2eff55;box-shadow:0 0 18px #8a2eff55}
+.building:after{content:"";position:absolute;inset:8px;background:repeating-linear-gradient(0deg,transparent 0 18px,#00f7ff88 19px 22px),repeating-linear-gradient(90deg,transparent 0 18px,#ff2bd655 19px 22px);opacity:.6}
+.scan{position:fixed;inset:0;z-index:20;pointer-events:none;background:repeating-linear-gradient(0deg,transparent 0 3px,rgba(255,255,255,.025) 4px);mix-blend-mode:screen}
+.screen{position:absolute;inset:0;display:none;align-items:center;justify-content:center;padding:18px}.screen.active{display:flex}
+.panel{width:min(680px,96vw);padding:28px;border:2px solid var(--cyan);border-radius:20px;background:rgba(4,7,28,.9);box-shadow:0 0 18px var(--cyan),inset 0 0 35px #8a2eff44;text-align:center;backdrop-filter:blur(8px)}
+h1{font-size:clamp(34px,8vw,70px);margin:0 0 8px;line-height:.92;letter-spacing:3px;color:#fff;text-shadow:0 0 8px #fff,0 0 18px var(--cyan),4px 4px 0 var(--pink)}
+.sub{color:var(--green);font-weight:800;letter-spacing:2px;margin:14px 0}.brief{line-height:1.5;color:#cbd4ff}
+.legend{display:grid;grid-template-columns:1fr 1fr;gap:12px;text-align:left;margin:18px 0}.legend div{padding:12px;border-radius:12px;background:#ffffff09;border:1px solid #ffffff22;font-size:14px}.good{color:var(--green)}.bad{color:#ff6a89}
+button{border:2px solid var(--pink);border-radius:12px;padding:13px 24px;background:#211047;color:#fff;font-size:18px;font-weight:900;letter-spacing:1px;cursor:pointer;box-shadow:0 0 14px var(--pink);transition:.15s}button:hover,button:focus{transform:scale(1.06);background:#40166d;outline:2px solid #fff}button:active{transform:scale(.97)}
+#game{display:none;position:absolute;inset:0}#game.active{display:block}
+.hud{position:absolute;z-index:5;left:12px;right:12px;top:12px;display:flex;justify-content:space-between;gap:8px;pointer-events:none}.hudbox{padding:10px 14px;border:1px solid var(--cyan);border-radius:10px;background:#05091ddd;box-shadow:0 0 12px #00f7ff88;font-weight:900}.hudbox span{color:var(--green);font-size:22px}
+#level{text-align:center;color:var(--pink)}#arena{position:absolute;inset:0;overflow:hidden}
+.item{position:absolute;width:clamp(92px,18vw,145px);min-height:82px;padding:10px 7px;border-radius:15px;color:#fff;font-weight:900;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;user-select:none;animation:floaty .8s ease-in-out infinite alternate,spawn .18s ease-out;transform-origin:center;backdrop-filter:blur(5px)}
+.item.goodItem{border:2px solid var(--green);background:#063825dd;box-shadow:0 0 17px var(--green)}.item.badItem{border:2px solid var(--red);background:#45091ddd;box-shadow:0 0 17px var(--red)}.icon{font-size:29px}.label{font-size:12px;line-height:1.05}
+@keyframes floaty{to{transform:translateY(-8px) rotate(2deg)}}@keyframes spawn{from{opacity:0;transform:scale(.3) rotate(-20deg)}}
+.burst{position:absolute;z-index:8;pointer-events:none;font-size:26px;font-weight:900;animation:burst .65s ease-out forwards;text-shadow:0 0 8px currentColor}@keyframes burst{to{transform:translateY(-65px) scale(1.45);opacity:0}}
+.flash{animation:flash .2s}@keyframes flash{50%{filter:brightness(2)}}
+#endTitle{color:var(--green);font-size:clamp(30px,7vw,58px);text-shadow:0 0 18px currentColor;margin:0}.finalScore{font-size:32px;margin:18px}.finalScore b{color:var(--cyan);font-size:46px}.tip{border-left:3px solid var(--pink);padding:10px;text-align:left;background:#ffffff08;margin:16px 0;color:#d8dcff}
+@media(max-width:500px){.panel{padding:20px 15px}.legend{grid-template-columns:1fr}.legend div{padding:8px}.brief{font-size:14px}.hud{top:7px;left:7px;right:7px}.hudbox{padding:7px 9px;font-size:12px}.hudbox span{font-size:17px}}
+</style>
+</head>
+<body>
+<div id="city"><div class="skyline" id="skyline"></div><div class="grid"></div></div><div class="scan"></div>
+<section id="start" class="screen active"><div class="panel"><h1>NEON NET<br>DEFENDER</h1><div class="sub">CYBER DETECTIVE // MISSION 01</div><p class="brief">Hackers are flooding Neon City with digital threats. Collect security tools, avoid cyber traps, and protect the network before time runs out!</p><div class="legend"><div><strong class="good">SECURE +10</strong><br>🛡️ Firewall · 🔐 MFA · 🩹 Patches · 🔒 Encryption · 🔑 Passwords</div><div><strong class="bad">THREAT -10</strong><br>🎣 Phishing · 🦠 Malware · 🕸️ Fake Login · 💾 Bad USB · 🛸 Drone</div></div><button id="startBtn">START MISSION</button><p style="font-size:12px;color:#8792c9">Tap or click the floating objects. Audio starts after you press Start.</p></div></section>
+<main id="game"><div class="hud"><div class="hudbox">SCORE <span id="score">0</span></div><div class="hudbox" id="level">LEVEL 1</div><div class="hudbox">TIME <span id="time">60</span></div></div><div id="arena"></div></main>
+<section id="end" class="screen"><div class="panel"><h2 id="endTitle">MISSION COMPLETE</h2><div class="finalScore">FINAL SCORE<br><b id="finalScore">0</b></div><p id="rank" class="sub"></p><div id="tip" class="tip"></div><button id="againBtn">PLAY AGAIN</button></div></section>
+<script>
+const good=[['🛡️','Firewall Shield'],['🔐','MFA Token'],['🩹','Security Patch'],['🔒','Encrypted Data'],['🔑','Secure Password']];
+const bad=[['🎣','Phishing Email'],['🦠','Malware Virus'],['🕸️','Fake Login Page'],['💾','Dangerous USB'],['🛸','Hacker Drone']];
+const tips=['Turn on multi-factor authentication whenever it is available.','Never plug in a USB drive if you do not know where it came from.','Long, unique passwords are stronger than reused passwords.','Pause and check links before opening unexpected messages.','Install security updates to help close known weaknesses.'];
+let score=0,time=60,playing=false,spawnTimer,countTimer,audio;
+const $=id=>document.getElementById(id), arena=$('arena');
+function city(){const s=$('skyline');for(let i=0;i<18;i++){let b=document.createElement('div');b.className='building';b.style.left=(i*6-2)+'%';b.style.width=(4+Math.random()*6)+'%';b.style.height=(28+Math.random()*70)+'%';s.appendChild(b)}}city();
+function tone(freq,dur,type='sine',vol=.08){try{audio??=new (window.AudioContext||window.webkitAudioContext)();let o=audio.createOscillator(),g=audio.createGain();o.type=type;o.frequency.value=freq;g.gain.value=vol;o.connect(g);g.connect(audio.destination);o.start();g.gain.exponentialRampToValueAtTime(.001,audio.currentTime+dur);o.stop(audio.currentTime+dur)}catch(e){}}
+function show(id){document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));$('game').classList.remove('active');if(id==='game')$('game').classList.add('active');else $(id).classList.add('active')}
+function start(){score=0;time=60;playing=true;arena.innerHTML='';$('score').textContent=score;$('time').textContent=time;$('level').textContent='LEVEL 1';show('game');tone(440,.08);setTimeout(()=>tone(660,.1),90);scheduleSpawn();countTimer=setInterval(()=>{time--;$('time').textContent=time;let lvl=1+Math.floor((60-time)/15);$('level').textContent='LEVEL '+Math.min(lvl,4);if(time<=0)end()},1000)}
+function delay(){let lvl=1+Math.floor((60-time)/15);return Math.max(340,900-(lvl-1)*170)}
+function scheduleSpawn(){if(!playing)return;spawn();spawnTimer=setTimeout(scheduleSpawn,delay())}
+function spawn(){if(arena.children.length>11)return;let isGood=Math.random()<.56, data=(isGood?good:bad), d=data[Math.floor(Math.random()*data.length)],el=document.createElement('div');el.className='item '+(isGood?'goodItem':'badItem');el.innerHTML=`<span class="icon">${d[0]}</span><span class="label">${d[1]}</span>`;let w=Math.min(145,Math.max(92,innerWidth*.18));el.style.left=Math.max(5,Math.random()*(innerWidth-w-10))+'px';el.style.top=(75+Math.random()*Math.max(100,innerHeight-190))+'px';el.dataset.good=isGood;arena.appendChild(el);el.onclick=()=>hit(el);setTimeout(()=>{if(el.isConnected)el.remove()},Math.max(1150,2600-(60-time)*20))}
+function hit(el){if(!playing||!el.isConnected)return;let yes=el.dataset.good==='true',pts=yes?10:-10;score=Math.max(0,score+pts);$('score').textContent=score;tone(yes?780:125,yes?.12:.24,yes?'sine':'sawtooth',.1);let pop=document.createElement('div');pop.className='burst';pop.style.color=yes?'#39ff88':'#ff365e';pop.style.left=el.style.left;pop.style.top=el.style.top;pop.textContent=(yes?'+':'')+pts;arena.appendChild(pop);setTimeout(()=>pop.remove(),700);el.remove();document.body.classList.add('flash');setTimeout(()=>document.body.classList.remove('flash'),180)}
+function end(){playing=false;clearTimeout(spawnTimer);clearInterval(countTimer);arena.innerHTML='';$('finalScore').textContent=score;let rank=score>=200?'CYBER LEGEND':score>=100?'NETWORK GUARDIAN':'ROOKIE HACKER HUNTER';$('rank').textContent=rank;$('endTitle').style.color=score>=200?'#39ff88':score>=100?'#00f7ff':'#ff2bd6';$('tip').textContent='CYBER TIP: '+tips[Math.floor(Math.random()*tips.length)];show('end');tone(330,.12);setTimeout(()=>tone(440,.12),130);setTimeout(()=>tone(660,.3),260)}
+$('startBtn').onclick=start;$('againBtn').onclick=start;
+</script>
+</body>
+</html>
